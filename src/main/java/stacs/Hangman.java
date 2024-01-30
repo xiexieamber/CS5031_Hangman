@@ -1,13 +1,29 @@
 package stacs;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.util.*;
+
+/*
+* add -
+* recognize the upper and lower case
+* optimize the file path
+* draw the hangman
+* fix the error, if the guess is right, don't increase the wrong guesses, wrong guesses accumulate to 6 times to end the game
+* if the number of guesses exceeds 6 times, the guess logic will not be performed
+* */
+
 
 public class Hangman {
     private static final int MAX_ATTEMPTS = 6;
     private String wordToGuess;
     private Set<Character> guessedLetters;
-    private int wrongGuesses;
+    private int allGuesses;
+    private int  wrongGuesses;
+
+    public int getAllGuesses() {
+        return allGuesses;
+    }
 
     public int getWrongGuesses() {
         return wrongGuesses;
@@ -16,15 +32,86 @@ public class Hangman {
     public Hangman(String wordToGuess) {
         this.wordToGuess = wordToGuess;
         this.guessedLetters = new HashSet<>();
+        this.allGuesses = 0;
         this.wrongGuesses = 0;
     }
 
+    public static String getHangmanFigure(int wrongGuesses) {
+        switch (wrongGuesses) {
+            case 0:
+                return  "  +---+\n" +
+                        "      |\n" +
+                        "      |\n" +
+                        "      |\n" +
+                        "      |\n" +
+                        "      |\n" +
+                        "========\n";
+            case 1:
+                return  "  +---+\n" +
+                        "  |   |\n" +
+                        "  O   |\n" +
+                        "      |\n" +
+                        "      |\n" +
+                        "      |\n" +
+                        "========\n";
+            case 2:
+                return  "  +---+\n" +
+                        "  |   |\n" +
+                        "  O   |\n" +
+                        "  |   |\n" +
+                        "      |\n" +
+                        "      |\n" +
+                        "========\n";
+            case 3:
+                return  "  +---+\n" +
+                        "  |   |\n" +
+                        "  O   |\n" +
+                        " /|   |\n" +
+                        "      |\n" +
+                        "      |\n" +
+                        "========\n";
+            case 4:
+                return  "  +---+\n" +
+                        "  |   |\n" +
+                        "  O   |\n" +
+                        " /|\\  |\n" +
+                        "      |\n" +
+                        "      |\n" +
+                        "========\n";
+
+
+            case 5:
+                return  "  +---+\n" +
+                        "  |   |\n" +
+                        "  O   |\n" +
+                        " /|\\  |\n" +
+                        " /    |\n" +
+                        "      |\n" +
+                        "========\n";
+            case 6:
+                return  "  +---+\n" +
+                        "  |   |\n" +
+                        "  O   |\n" +
+                        " /|\\  |\n" +
+                        " / \\  |\n" +
+                        "      |\n" +
+                        "========\n";
+            default:
+                return "";
+        }
+    }
+
+
     public boolean guess(char letter) {
-        if (wordToGuess.indexOf(letter) >= 0) {
-            guessedLetters.add(letter);
-            wrongGuesses ++;
+        if (isGameOver()) {
+            return false;
+        }
+        if (wordToGuess.indexOf(letter) >= 0 || wordToGuess.indexOf(Character.toLowerCase(letter)) >= 0) {
+            guessedLetters.add(Character.toLowerCase(letter));
+            allGuesses++;
             return true;
         } else {
+            allGuesses++;
             wrongGuesses++;
             return false;
         }
@@ -36,7 +123,7 @@ public class Hangman {
 
     public boolean isWordGuessed() {
         for (char letter : wordToGuess.toCharArray()) {
-            if (!guessedLetters.contains(letter)) {
+            if (!guessedLetters.contains(letter) && !guessedLetters.contains(Character.toLowerCase(letter))) {
                 return false;
             }
         }
@@ -62,46 +149,40 @@ public class Hangman {
         Scanner scanner = new Scanner(System.in);
         System.out.println("Welcome to hangman!");
         while (!game.isGameOver()) {
-            System.out.println("The current state of the word" + game.getCurrentState());
+            System.out.println("The current state of the word " + game.getCurrentState());
             System.out.print("Please enter a letter: ");
             char guess = scanner.nextLine().charAt(0);
             if (game.guess(guess)) {
                 System.out.println("CORRECT GUESS!");
             } else {
+                String man = getHangmanFigure(game.wrongGuesses);
+                System.out.println(man);
                 System.out.println("WRONG GUESS!");
             }
         }
-
         if (game.isWordGuessed()) {
             System.out.println("CONGRATULATIONS! THE WORD IS " + randomWord);
         } else {
             System.out.println("THE GAME IS OVER. YOU LOST! THE WORD IS " + randomWord);
         }
     }
-
     private static String getRandomWord() {
         List<String> words = new ArrayList<>();
-        try {
-            File file = new File("/Users/amber/Desktop/semaster2/CS5031/Hangman/src/main/resources/wordlist.txt");
-            Scanner scanner = new Scanner(file);
-            while (scanner.hasNextLine()) {
-                String word = scanner.nextLine().trim();
-                if (word.length() == 5) {
-                    words.add(word);
-                }
+        InputStream inputStream = Hangman.class.getClassLoader().getResourceAsStream("wordlist.txt");
+        Scanner scanner = new Scanner(inputStream);
+        while (scanner.hasNextLine()) {
+            String word = scanner.nextLine().trim();
+            if (word.length() == 5) {
+                words.add(word);
             }
-            scanner.close();
-        } catch (FileNotFoundException e) {
-            System.out.println("CAN'T FIND THE FILE: " + e.getMessage());
-            return null;
         }
+        scanner.close();
         if (words.isEmpty()) {
             System.out.println("THE WORD LIST IS EMPTY! PLEASE CHECK THE FILE.");
             return null;
         }
         String s = words.get(new Random().nextInt(words.size()));
-        return s;
-//        return "hello";
+        return "apple";
     }
 }
 
