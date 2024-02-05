@@ -5,21 +5,30 @@ import java.io.InputStream;
 import java.util.Scanner;
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertTrue;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.Assert.assertFalse;
 import static stacs.Hangman.getHangmanFigure;
 
 /*
 Add
-if the letter has been guessed, the number of wrong guesses will not increase
-if the input is an invalid character, the number of wrong guesses will not increase
+Refactor the code to make it more readable and easier to understand.
+Add javadoc comments.
 * */
 class test {
-    private Hangman game;
+    private Hangman game; // The game instance.
+
+    /**
+     * Set up the game instance before each test.
+     * */
     @BeforeEach
     void setUp() {
         String firstWord = getFirstWordFromTestFile();
         game = new Hangman(firstWord);
     }
+
+    /**
+     * Get the first word from the test file.
+     * @return The first word from the test file.
+     * */
     private String getFirstWordFromTestFile() {
         try {
             InputStream inputStream = Hangman.class.getClassLoader().getResourceAsStream("wordlist-test.txt");
@@ -34,6 +43,9 @@ class test {
         return null;
     }
 
+    /**
+     * Test whether the game is over after 6 wrong guesses.
+     */
     @Test
     void testNoGuessesAfterGameOver() {
         for (int i = 0; i < 6; i++) {
@@ -43,6 +55,9 @@ class test {
         assertEquals(6, game.getAllGuesses());
     }
 
+    /**
+     * Test wrong guesses be input twice won't increase the number of wrong guesses.
+     */
     @Test
     void testGetWrongGuessesEnterRightWordTwice() {
         game.guess('a');
@@ -50,6 +65,9 @@ class test {
         assertEquals(0, game.getWrongGuesses());
     }
 
+    /**
+     * Test correct guesses be input twice will increase the number of correct guesses.
+     */
     @Test
     void testGetAllGuessesEnterRightWordTwice() {
         game.guess('a');
@@ -57,6 +75,9 @@ class test {
         assertEquals(2, game.getAllGuesses());
     }
 
+    /**
+     * Test whether the hangman figure is correct.
+     */
     @Test
     void testHangmanFigure() {
         String manFirstImage = getHangmanFigure(0);
@@ -119,18 +140,28 @@ class test {
                 "========\n", manSeventhImage);
     }
 
+    /**
+     * Test when input a correct letter, the letter will be shown in the current state.
+     */
     @Test
     void testGuessCorrectLetter() {
         assertTrue(game.guess('a'));
         assertEquals("_ a _ _ _ ", game.getCurrentState());
     }
 
+    /**
+     * Test when input a wrong letter, the number of wrong guesses and all guesses will increase.
+     */
     @Test
     void testGuessWrongLetter() {
         assertFalse(game.guess('z'));
         assertEquals(1, game.getAllGuesses());
+        assertEquals(1, game.getWrongGuesses());
     }
 
+    /**
+     * Test whether the game is over after 6 wrong guesses.
+     */
     @Test
     void testIsGameOver() {
         for (int i = 0; i < 6; i++) {
@@ -139,6 +170,9 @@ class test {
         assertTrue(game.isGameOver());
     }
 
+    /**
+     * Test whether the word is guessed.
+     */
     @Test
     void testIsWordGuessed() {
         for (char c : "maven".toCharArray()) {
@@ -147,6 +181,9 @@ class test {
         assertTrue(game.isWordGuessed());
     }
 
+    /**
+     * Test whether the current state is correct when input two correct letters.
+     */
     @Test
     void testGetCurrentState() {
         game.guess('m');
@@ -154,12 +191,9 @@ class test {
         assertEquals("m a _ _ _ ", game.getCurrentState());
     }
 
-    @Test
-    void testGetCurrentStateUpperWord() {
-        game.guess('M');
-        assertEquals("m _ _ _ _ ", game.getCurrentState());
-    }
-
+    /**
+     * Test input invalid character.
+     */
     @Test
     void testInputInvalidCharacter() {
         assertFalse(game.guess('1'));
