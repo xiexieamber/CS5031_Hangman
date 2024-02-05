@@ -9,12 +9,10 @@ import static org.junit.jupiter.api.Assertions.*;
 import static stacs.Hangman.getHangmanFigure;
 
 /*
-* test the first word maven
-* test man's image
-* test upper and lower case
-* test no guesses after game over
+Add
+if the letter has been guessed, the number of wrong guesses will not increase
+if the input is an invalid character, the number of wrong guesses will not increase
 * */
-
 class test {
     private Hangman game;
     @BeforeEach
@@ -160,5 +158,13 @@ class test {
     void testGetCurrentStateUpperWord() {
         game.guess('M');
         assertEquals("m _ _ _ _ ", game.getCurrentState());
+    }
+
+    @Test
+    void testInputInvalidCharacter() {
+        assertFalse(game.guess('1'));
+        assertFalse(game.guess('?'));
+        assertFalse(game.guess('!'));
+        assertFalse(game.guess(' '));
     }
 }

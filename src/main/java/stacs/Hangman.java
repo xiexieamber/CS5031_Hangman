@@ -5,12 +5,10 @@ import java.io.InputStream;
 import java.util.*;
 
 /*
-* add -
-* recognize the upper and lower case
-* optimize the file path
-* draw the hangman
-* fix the error, if the guess is right, don't increase the wrong guesses, wrong guesses accumulate to 6 times to end the game
-* if the number of guesses exceeds 6 times, the guess logic will not be performed
+Add
+test the input condition, the input must be a letter, and cannot be a number, and cannot be a letter that has been guessed
+add the option to play again
+modify the input error message, it is invalid input, it does not affect the number of errors
 * */
 
 
@@ -151,7 +149,19 @@ public class Hangman {
         while (!game.isGameOver()) {
             System.out.println("The current state of the word " + game.getCurrentState());
             System.out.print("Please enter a letter: ");
-            char guess = scanner.nextLine().charAt(0);
+            String  input = scanner.nextLine();
+            if (input.length() != 1) {
+                System.out.println("Please enter a valid letter instead of more than one letter!");
+                continue;
+            }
+            char guess = input.charAt(0);
+            if (guess < 'A' || (guess > 'Z' && guess < 'a') || guess > 'z') {
+                System.out.println("Please enter a valid letter!");
+                continue;
+            } else if (game.guessedLetters.contains(guess) || game.guessedLetters.contains(Character.toLowerCase(guess))) {
+                System.out.println("You have already guessed this letter!");
+                continue;
+            }
             if (game.guess(guess)) {
                 System.out.println("CORRECT GUESS!");
             } else {
@@ -164,6 +174,15 @@ public class Hangman {
             System.out.println("CONGRATULATIONS! THE WORD IS " + randomWord);
         } else {
             System.out.println("THE GAME IS OVER. YOU LOST! THE WORD IS " + randomWord);
+        }
+        System.out.println("DO YOU WANT TO PLAY AGAIN? (Y/N)");
+        String playAgain = scanner.nextLine();
+        if (playAgain.equalsIgnoreCase("Y")) {
+            main(args);
+        } else {
+            System.out.println("THANK YOU FOR PLAYING!");
+            scanner.close();
+            System.exit(0);
         }
     }
     private static String getRandomWord() {
@@ -183,6 +202,7 @@ public class Hangman {
         }
         String s = words.get(new Random().nextInt(words.size()));
         return "apple";
+//        return  s;
     }
 }
 
