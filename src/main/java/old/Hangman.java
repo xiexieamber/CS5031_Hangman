@@ -1,17 +1,11 @@
-package stacs;
+package old;
 import java.io.InputStream;
 import java.util.*;
 
 /*
 Add
-Refactor the code to make it more readable and understandable:
-1. Increase readability and maintainability
-Separate logic: Separate game logic, user input processing, and game interface display into separate methods to improve code clarity and maintainability.
-2. Structural optimisation
-Optimise guess methods: Adjust methods to avoid duplicating code and to handle correct guess and incorrect guess logic more clearly.
-
-
-Add javadoc comments.
+Add hint function.
+Separate the user prompt in the playgame from the palygame function.
 * */
 
 
@@ -22,15 +16,61 @@ public class Hangman {
     private int allGuesses; // the total number of guesses made so far (including wrong guesses)
     private int wrongGuesses; // the number of wrong guesses made so far
 
+    private StringBuilder currentState; // the current state of the word to guess, with underscores for unguessed letters
+
+    private Set<Character> hintedLetters; // the letters that have been hinted
+
+    private int hint_count;// the number of hints that can be used
+
     /**
      * Constructor for the Hangman class.
      * */
     public Hangman(String wordToGuess) {
         this.wordToGuess = wordToGuess.toLowerCase();
         this.guessedLetters = new HashSet<>();
+        this.hintedLetters = new HashSet<>();
         this.allGuesses = 0;
         this.wrongGuesses = 0;
+        this.hint_count = 1;
+        this.currentState = new StringBuilder("_".repeat(wordToGuess.length()));
     }
+
+    public String useHint() {
+        if (hint_count > 0) {
+            hint_count--;
+            return provideHint();
+        }else {
+            return "Sorry, you have used all the hints";
+        }
+    }
+
+    /**
+     * Provide a hint to the user.
+     * @return A hint to the user.
+     * */
+    public String provideHint() {
+        Random random = new Random();
+        char hintChar = 0;
+        int index = -1;
+        for (int i = 0; i < wordToGuess.length(); i++) {
+            char c = wordToGuess.charAt(i);
+            if (currentState.charAt(i) == '_' && !hintedLetters.contains(c)) {
+                hintChar = c;
+                index = i;
+                break;
+            }
+        }
+        if (hintChar != 0) {
+            hintedLetters.add(hintChar);
+            currentState.setCharAt(index, hintChar);
+            guessedLetters.add(hintChar);
+            return "The letter '" + hintChar + "' is at position " + (index + 1) + " hint has been used, you luck :)" +
+                    "\n" + "The current state of the word: " + getCurrentState();
+        } else {
+            return "Sorry, no more hints available.";
+        }
+    }
+
 
     /**
      * Test whether the input is a valid letter or not, and whether it has been guessed before.
@@ -38,10 +78,14 @@ public class Hangman {
      * */
     private char getUserInput(Scanner scanner) {
         String input;
-        char guess;
+        char guess = ' ';
         do {
             System.out.print("Please enter a letter: ");
             input = scanner.nextLine();
+            if (input.equals("hint")) {
+                System.out.println(useHint());
+                continue;
+            }
             guess = input.length() == 1 ? input.toLowerCase().charAt(0) : ' ';
             if (!Character.isLetter(guess)) {
                 System.out.println("Please enter a valid letter!");
@@ -107,6 +151,7 @@ public class Hangman {
         for (char letter : wordToGuess.toCharArray()) {
             display.append(guessedLetters.contains(letter) ? letter : '_').append(' ');
         }
+        currentState = display;
         return display.toString();
     }
 
@@ -115,13 +160,12 @@ public class Hangman {
      */
     private void playGame() {
         Scanner scanner = new Scanner(System.in);
-        System.out.println("Welcome to hangman!");
+        instruction();
         while (!isGameOver()) {
             System.out.println("The current state of the word: " + getCurrentState());
             char guess = getUserInput(scanner);
             guess(guess);
         }
-
         if (isWordGuessed()) {
             System.out.println("CONGRATULATIONS! THE WORD IS " + wordToGuess.toUpperCase());
         } else {
@@ -136,6 +180,16 @@ public class Hangman {
             scanner.close();
             System.exit(0);
         }
+    }
+
+    /**
+     * The function to display the instruction of the game.
+     */
+    private static void instruction() {
+        System.out.println("Welcome to hangman!");
+        System.out.println("The word to guess has 5 letters, and you have 6 wrong guesses allowed.");
+        System.out.println("Don't worry, if you are a beginner, we can offer hint for you ? If so, you can use the hint once. If you want to use the hint, please enter 'hint'.");
+        System.out.println("Good Luck! :)");
     }
 
     /**

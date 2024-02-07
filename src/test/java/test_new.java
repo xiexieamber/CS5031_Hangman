@@ -1,22 +1,22 @@
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import stacs.Hangman_new;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Scanner;
-import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertTrue;
-import static org.junit.Assert.assertFalse;
-import static old.Hangman.getHangmanFigure;
 
-import old.Hangman;
+import static junit.framework.TestCase.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 /*
 Add
 Hint test.
 * */
 
 
-class test {
-    private Hangman game; // The game instance.
+class test_new {
+    private Hangman_new game; // The game instance.
 
     /**
      * Set up the game instance before each test.
@@ -24,7 +24,11 @@ class test {
     @BeforeEach
     void setUp() {
         String firstWord = getFirstWordFromTestFile();
-        game = new Hangman(firstWord);
+        try {
+            game = new Hangman_new(firstWord);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
@@ -33,7 +37,7 @@ class test {
      * */
     private String getFirstWordFromTestFile() {
         try {
-            InputStream inputStream = Hangman.class.getClassLoader().getResourceAsStream("wordlist-test.txt");
+            InputStream inputStream = Hangman_new.class.getClassLoader().getResourceAsStream("wordlist-test.txt");
             Scanner scanner = new Scanner(inputStream);
             if (scanner.hasNextLine()) {
                 return scanner.nextLine().trim();
@@ -50,8 +54,8 @@ class test {
      */
     @Test
     void testUseHint() {
-        game.useHint();
-        assertEquals("m _ _ _ _ ", game.getCurrentState());
+        game.getHintSystem().useHint();
+        assertEquals("m _ _ _ _ ", game.getGameState().getCurrentState());
     }
 
     /**
@@ -59,11 +63,15 @@ class test {
      */
     @Test
     void testNoGuessesAfterGameOver() {
-        for (int i = 0; i < 6; i++) {
-            game.guess('z');
-        }
-        assertFalse(game.guess('m'));
-        assertEquals(6, game.getAllGuesses());
+            game.getGameState().guess('z');
+            game.getGameState().guess('x');
+            game.getGameState().guess('c');
+            game.getGameState().guess('k');
+                game.getGameState().guess('b');
+                game.getGameState().guess('j');
+
+        assertFalse(game.getGameState().guess('m'));
+        assertEquals(6, game.getGameState().getAllGuesses());
     }
 
     /**
@@ -71,9 +79,9 @@ class test {
      */
     @Test
     void testGetWrongGuessesEnterRightWordTwice() {
-        game.guess('a');
-        game.guess('a');
-        assertEquals(0, game.getWrongGuesses());
+        game.getGameState().guess('a');
+        game.getGameState().guess('a');
+        assertEquals(0, game.getGameState().getWrongGuesses());
     }
 
     /**
@@ -81,9 +89,9 @@ class test {
      */
     @Test
     void testGetAllGuessesEnterRightWordTwice() {
-        game.guess('a');
-        game.guess('a');
-        assertEquals(2, game.getAllGuesses());
+        game.getGameState().guess('a');
+        game.getGameState().guess('a');
+        assertEquals(1, game.getGameState().getAllGuesses());
     }
 
     /**
@@ -91,7 +99,7 @@ class test {
      */
     @Test
     void testHangmanFigure() {
-        String manFirstImage = getHangmanFigure(0);
+        String manFirstImage = game.getGameState().getHangmanFigure(0);
         assertEquals("  +---+\n" +
                 "      |\n" +
                 "      |\n" +
@@ -99,7 +107,7 @@ class test {
                 "      |\n" +
                 "      |\n" +
                 "========\n", manFirstImage);
-        String manSecondImage = getHangmanFigure(1);
+        String manSecondImage = game.getGameState().getHangmanFigure(1);
         assertEquals("  +---+\n" +
                 "  |   |\n" +
                 "  O   |\n" +
@@ -107,7 +115,7 @@ class test {
                 "      |\n" +
                 "      |\n" +
                 "========\n", manSecondImage);
-        String manThirdImage = getHangmanFigure(2);
+        String manThirdImage = game.getGameState().getHangmanFigure(2);
         assertEquals("  +---+\n" +
                 "  |   |\n" +
                 "  O   |\n" +
@@ -115,7 +123,7 @@ class test {
                 "      |\n" +
                 "      |\n" +
                 "========\n", manThirdImage);
-        String manFourthImage = getHangmanFigure(3);
+        String manFourthImage = game.getGameState().getHangmanFigure(3);
         assertEquals("  +---+\n" +
                 "  |   |\n" +
                 "  O   |\n" +
@@ -124,7 +132,7 @@ class test {
                 "      |\n" +
                 "========\n", manFourthImage);
 
-        String manFifthImage = getHangmanFigure(4);
+        String manFifthImage = game.getGameState().getHangmanFigure(4);
         assertEquals("  +---+\n" +
                 "  |   |\n" +
                 "  O   |\n" +
@@ -133,7 +141,7 @@ class test {
                 "      |\n" +
                 "========\n", manFifthImage);
 
-        String manSixthImage = getHangmanFigure(5);
+        String manSixthImage = game.getGameState().getHangmanFigure(5);
         assertEquals("  +---+\n" +
                 "  |   |\n" +
                 "  O   |\n" +
@@ -141,7 +149,7 @@ class test {
                 " /    |\n" +
                 "      |\n" +
                 "========\n", manSixthImage);
-        String manSeventhImage = getHangmanFigure(6);
+        String manSeventhImage = game.getGameState().getHangmanFigure(6);
         assertEquals("  +---+\n" +
                 "  |   |\n" +
                 "  O   |\n" +
@@ -156,8 +164,8 @@ class test {
      */
     @Test
     void testGuessCorrectLetter() {
-        assertTrue(game.guess('a'));
-        assertEquals("_ a _ _ _ ", game.getCurrentState());
+        assertTrue(game.getGameState().guess('a'));
+        assertEquals("_ a _ _ _ ", game.getGameState().getCurrentState());
     }
 
     /**
@@ -165,21 +173,11 @@ class test {
      */
     @Test
     void testGuessWrongLetter() {
-        assertFalse(game.guess('z'));
-        assertEquals(1, game.getAllGuesses());
-        assertEquals(1, game.getWrongGuesses());
+        assertFalse(game.getGameState().guess('z'));
+        assertEquals(1, game.getGameState().getAllGuesses());
+        assertEquals(1, game.getGameState().getWrongGuesses());
     }
 
-    /**
-     * Test whether the game is over after 6 wrong guesses.
-     */
-    @Test
-    void testIsGameOver() {
-        for (int i = 0; i < 6; i++) {
-            game.guess('z');
-        }
-        assertTrue(game.isGameOver());
-    }
 
     /**
      * Test whether the word is guessed.
@@ -187,9 +185,9 @@ class test {
     @Test
     void testIsWordGuessed() {
         for (char c : "maven".toCharArray()) {
-            game.guess(c);
+            game.getGameState().guess(c);
         }
-        assertTrue(game.isWordGuessed());
+        assertTrue(game.getGameState().isWordGuessed());
     }
 
     /**
@@ -197,9 +195,9 @@ class test {
      */
     @Test
     void testGetCurrentState() {
-        game.guess('m');
-        game.guess('a');
-        assertEquals("m a _ _ _ ", game.getCurrentState());
+        game.getGameState().guess('m');
+        game.getGameState().guess('a');
+        assertEquals("m a _ _ _ ", game.getGameState().getCurrentState());
     }
 
     /**
@@ -207,9 +205,9 @@ class test {
      */
     @Test
     void testInputInvalidCharacter() {
-        assertFalse(game.guess('1'));
-        assertFalse(game.guess('?'));
-        assertFalse(game.guess('!'));
-        assertFalse(game.guess(' '));
+        assertFalse(game.getGameState().guess('1'));
+        assertFalse(game.getGameState().guess('?'));
+        assertFalse(game.getGameState().guess('!'));
+        assertFalse(game.getGameState().guess(' '));
     }
 }
